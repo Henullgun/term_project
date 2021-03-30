@@ -1,27 +1,57 @@
+
+import cv2
+import time
+import os
+import urllib.request
+from face_detecting_data.face_detect import getFacePosition
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from tqdm import tqdm
+
 class Crawler():
 
-    downloadPath = "./face_detecting_data/crawler/imageset"
+    downloadPath = "./face_detecting_data/crawler/imageset/"
     
     def __init__(self):
         self.count = 1
         self.driver = self.creatDriver()
 
-    def setURL(self, url):
+    def setURL(self, emotion, url):
+        self.emotion = emotion
         self.url = url
         self.startCrawler()
+        
     
     def creatDriver(self):
         options = webdriver.ChromeOptions()
-        options.add_argument('headless')
+        # options.add_argument('headless')
         options.add_argument('log-level=3')
         options.add_argument("disable-gpu")
-        driver = webdriver.Chrome('./chromedriver.exe', chrome_options=options)
+        driver = webdriver.Chrome('./face_detecting_data/crawler/chromedriver.exe', chrome_options=options)
         driver.set_window_size(1920, 1080)
         return driver
     
     def dirCheck(self):
         if not os.path.isdir(self.downloadPath):                                                           
             os.mkdir(self.downloadPath)
+
+        if not os.path.isdir(self.downloadPath+"Fear"):                                                           
+            os.mkdir(self.downloadPath+"Fear")
+
+        if not os.path.isdir(self.downloadPath+"Sadness"):                                                           
+            os.mkdir(self.downloadPath+"Sadness")
+
+        if not os.path.isdir(self.downloadPath+"Joy"):                                                           
+            os.mkdir(self.downloadPath+"Joy")
+            
+        if not os.path.isdir(self.downloadPath+"Disgust"):                                                           
+            os.mkdir(self.downloadPath+"Disgust")
+
+        if not os.path.isdir(self.downloadPath+"Anger"):                                                           
+            os.mkdir(self.downloadPath+"Anger")
+        
+        if not os.path.isdir(self.downloadPath+"Expressionless"):                                                           
+            os.mkdir(self.downloadPath+"Expressionless")
 
     def scrollDown(self, driver):
         while(True):
@@ -31,7 +61,8 @@ class Crawler():
                 end = soup.find(class_="DwpMZe")
                 if (str(more).find("display:none;") == -1):
                     if(str(end).find('data-status="3"') == -1):
-                        self.driver.find_element_by_xpath('//*[@id="islmp"]/div/div/div/div/div[5]/input').click()
+                        
+                        self.driver.find_element_by_xpath('//*[@id="islmp"]/div/div/div/div/div[4]/div[2]/input').click()
                     else:
                         break
                 self.driver.execute_script("window.scrollBy(0,10000)")
@@ -61,31 +92,32 @@ class Crawler():
                 img.click()
                 time.sleep(3)
                 
-                src = self.driver.find_element_by_xpath(
-                '//*[@id="Sva75c"]/div/div/div[3]/div[2]/c-wiz/div[1]/div[1]/div/div[2]/a/img')
+                src = self.driver.find_element_by_xpath('//*[@id="Sva75c"]/div/div/div[3]/div[2]/c-wiz/div/div[1]/div[1]/div/div[2]/a/img')
                 src = src.get_attribute('src')
                 url_list.append(src)
-                urllib.request.urlretrieve(src, self.downloadPath + format(self.count, '04')+".jpg")
+                urllib.request.urlretrieve(src, self.downloadPath + self.emotion + f"/{self.emotion}__{format(self.count, '04')}.jpg")
                 self.count += 1
             except:
                 pass
 
     def filtering(self):
         filtered_count = 0
-        dir_name = "./download/"
+        dir_name = f"./face_detecting_data/crawler/imageset/{self.emotion}/"
+        count = 0
         for index, file_name in enumerate(os.listdir(dir_name)):
-            try:
-                file_path = os.path.join(dir_name, file_name)
-                img = Image.open(file_path)
-
-                if img.width < 1280 and img.height < 720:
-                    img.close()
-                    os.remove(file_path)
-                    filtered_count += 1
-
-            except OSError:
+            file_path = os.path.join(dir_name, file_name)
+            img = cv2.imread(file_path)
+            
+            faces = getFacePosition(img)
+            if len(faces) == 0:
                 os.remove(file_path)
-                filtered_count += 1
+            else:
+                for face in faces:
+                    face_img = img[face[1]-30:face[1]+face[3]+30, face[0]-30:face[0]+face[2]+30]
+                    cv2.imwrite(f"{dir_name}{self.emotion}_{format(count, '04')}.png", face_img)
+                    count += 1
+            
+
 
     def startCrawler(self):
         self.driver.get(self.url)
@@ -94,29 +126,20 @@ class Crawler():
         imgs = self.getImage(soup)
         self.dirCheck()
         self.imgDownload(imgs)
-        # self.filtering()
+        self.filtering()
 
 if __name__=='__main__':
     # print("URL입력")
     # url = input()
     crawler = Crawler()
     
-    urls = [
-                "https://www.google.com/search?q=%EB%B9%8C%EB%94%A9%20%ED%95%98%EB%8A%98&tbm=isch&tbs=isz:l&hl=ko&sa=X&ved=0CAEQpwVqFwoTCKC47aeUmO4CFQAAAAAdAAAAABAC&biw=1903&bih=937",
-                "https://www.google.com/search?q=%EB%8F%84%EC%8B%9C%20%ED%95%98%EB%8A%98&tbm=isch&tbs=isz:l&hl=ko&sa=X&ved=0CAEQpwVqFwoTCIingNaWmO4CFQAAAAAdAAAAABAC&biw=1903&bih=937",
-                "https://www.google.com/search?q=%EC%82%B0%20%ED%95%98%EB%8A%98&tbm=isch&tbs=isz:l&hl=ko&sa=X&ved=0CAEQpwVqFwoTCMC9sv2WmO4CFQAAAAAdAAAAABAC&biw=1903&bih=937",
-                "https://www.google.com/search?q=%EC%88%B2%20%ED%95%98%EB%8A%98&tbm=isch&tbs=isz:l&hl=ko&sa=X&ved=0CAEQpwVqFwoTCPD_zeOUmO4CFQAAAAAdAAAAABAC&biw=1903&bih=937#imgrc=fHI-4ASdG81cwM",
-                "https://www.google.com/search?q=%ED%98%B8%EC%88%98%20%ED%95%98%EB%8A%98&tbm=isch&tbs=isz:l&hl=ko&sa=X&ved=0CAEQpwVqFwoTCKjD8tqWmO4CFQAAAAAdAAAAABAC&biw=1903&bih=937",
-                "https://www.google.com/search?q=%EB%B0%94%EB%8B%A4%20%ED%95%98%EB%8A%98&tbm=isch&tbs=isz:l&hl=ko&sa=X&ved=0CAEQpwVqFwoTCPCyut6WmO4CFQAAAAAdAAAAABAC&biw=1903&bih=937",
-                "https://www.google.com/search?q=%ED%95%B4%EB%B3%80%20%ED%95%98%EB%8A%98&tbm=isch&tbs=isz:l&hl=ko&sa=X&ved=0CAEQpwVqFwoTCNjVkOmWmO4CFQAAAAAdAAAAABAC&biw=1903&bih=937",
-                "https://www.google.com/search?q=%ED%95%B4%EB%B3%80&tbm=isch&tbs=isz:l&hl=ko&sa=X&ved=0CAEQpwVqFwoTCLDWjfCWmO4CFQAAAAAdAAAAABAC&biw=1903&bih=937",
-                "https://www.google.com/search?q=sky%20mountain&tbm=isch&tbs=isz:l&hl=ko&sa=X&ved=0CAEQpwVqFwoTCKCtiYmXmO4CFQAAAAAdAAAAABAC&biw=1903&bih=937",
-                "https://www.google.com/search?q=lake%20sky&tbm=isch&hl=ko&tbs=isz:l&sa=X&ved=0CAEQpwVqFwoTCMj9spaXmO4CFQAAAAAdAAAAABAC&biw=1903&bih=937",
-                "https://www.google.com/search?q=city%20sky&tbm=isch&tbs=isz:l&hl=ko&sa=X&ved=0CAEQpwVqFwoTCJCg4ZyXmO4CFQAAAAAdAAAAABAC&biw=1903&bih=937",
-                "https://www.google.com/search?q=sky%20building&tbm=isch&tbs=isz:l&hl=ko&sa=X&ved=0CAEQpwVqFwoTCMCz48-XmO4CFQAAAAAdAAAAABAC&biw=1903&bih=937",
-                "https://www.google.com/search?q=%EB%A7%88%EC%9D%84%20%ED%95%98%EB%8A%98&tbm=isch&hl=ko&tbs=isz:l&sa=X&ved=0CAEQpwVqFwoTCIi6_O2XmO4CFQAAAAAdAAAAABAC&biw=1903&bih=937",
-                "https://www.google.com/search?q=village%20sky&tbm=isch&tbs=isz:l&hl=ko&sa=X&ved=0CAEQpwVqFwoTCKCywIGYmO4CFQAAAAAdAAAAABAC&biw=1903&bih=937",
-        ]
-    for url in tqdm(urls): 
-        crawler.setURL(url)
+    urls ={
+        'Fear' : 'https://www.google.com/search?q=fear+face&tbm=isch&chips=q:fear+face,online_chips:human&hl=ko&sa=X&ved=2ahUKEwicgtek6dTvAhVRfHAKHRcXB8AQ4lYoAnoECAEQGw&biw=1029&bih=845',
+        'Sadness' : 'https://www.google.com/search?q=Sadness+face&tbm=isch&chips=q:happiness+face,online_chips:human&hl=ko&sa=X&ved=2ahUKEwiji4T96NTvAhXCEXAKHZKxBh4Q4lYoAnoECAEQGw&biw=1029&bih=845',
+        'Joy' : 'https://www.google.com/search?q=happiness+face&tbm=isch&chips=q:happiness+face,online_chips:human&hl=ko&sa=X&ved=2ahUKEwiji4T96NTvAhXCEXAKHZKxBh4Q4lYoAnoECAEQGw&biw=1029&bih=845',
+        'Disgust' : 'https://www.google.com/search?q=Disgust+face&tbm=isch&chips=q:happiness+face,online_chips:human&hl=ko&sa=X&ved=2ahUKEwiji4T96NTvAhXCEXAKHZKxBh4Q4lYoAnoECAEQGw&biw=1029&bih=845',
+        'Anger' : 'https://www.google.com/search?q=Anger+face&tbm=isch&chips=q:happiness+face,online_chips:human&hl=ko&sa=X&ved=2ahUKEwiji4T96NTvAhXCEXAKHZKxBh4Q4lYoAnoECAEQGw&biw=1029&bih=845'    }
+
+    for key in tqdm(urls): 
+        crawler.setURL(key, urls[key])
     
