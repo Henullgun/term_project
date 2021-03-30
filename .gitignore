@@ -1,1 +1,3 @@
 /.vscode
+/face_detecting_data/crawler/imageset
+/face_detecting_data/__pycache__

@@ -4,7 +4,7 @@ import os
 
 def getFacePosition(image):
     """list형식의 x, y, w, h의 반환값으로 좌표와 넓이를 나타냄"""
-    faceCascade= cv2.CascadeClassifier(os.path.join("./face_detecting_data", "haarcascade_frontalface_default.xml"))
+    faceCascade= cv2.CascadeClassifier(r'face_detecting_data\haarcascade_frontalface_alt.xml')
     img_rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
     img_gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
 
