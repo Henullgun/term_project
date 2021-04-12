@@ -139,10 +139,10 @@ if __name__=='__main__':
     crawler = Crawler()
     
     urls ={
-        # 'Anger' : 'https://www.google.com/search?q=Anger+face&tbm=isch&chips=q:happiness+face,online_chips:human&hl=ko&sa=X&ved=2ahUKEwiji4T96NTvAhXCEXAKHZKxBh4Q4lYoAnoECAEQGw&biw=1029&bih=845',
-        # 'Disgust' : 'https://www.google.com/search?q=Disgust+face&tbm=isch&chips=q:happiness+face,online_chips:human&hl=ko&sa=X&ved=2ahUKEwiji4T96NTvAhXCEXAKHZKxBh4Q4lYoAnoECAEQGw&biw=1029&bih=845',
-        # 'Joy' : 'https://www.google.com/search?q=happiness+face&tbm=isch&chips=q:happiness+face,online_chips:human&hl=ko&sa=X&ved=2ahUKEwiji4T96NTvAhXCEXAKHZKxBh4Q4lYoAnoECAEQGw&biw=1029&bih=845',
-        # 'Sadness' : 'https://www.google.com/search?q=Sadness+face&tbm=isch&chips=q:happiness+face,online_chips:human&hl=ko&sa=X&ved=2ahUKEwiji4T96NTvAhXCEXAKHZKxBh4Q4lYoAnoECAEQGw&biw=1029&bih=845',        
+        'Anger' : 'https://www.google.com/search?q=Anger+face&tbm=isch&chips=q:happiness+face,online_chips:human&hl=ko&sa=X&ved=2ahUKEwiji4T96NTvAhXCEXAKHZKxBh4Q4lYoAnoECAEQGw&biw=1029&bih=845',
+        'Disgust' : 'https://www.google.com/search?q=Disgust+face&tbm=isch&chips=q:happiness+face,online_chips:human&hl=ko&sa=X&ved=2ahUKEwiji4T96NTvAhXCEXAKHZKxBh4Q4lYoAnoECAEQGw&biw=1029&bih=845',
+        'Joy' : 'https://www.google.com/search?q=happiness+face&tbm=isch&chips=q:happiness+face,online_chips:human&hl=ko&sa=X&ved=2ahUKEwiji4T96NTvAhXCEXAKHZKxBh4Q4lYoAnoECAEQGw&biw=1029&bih=845',
+        'Sadness' : 'https://www.google.com/search?q=Sadness+face&tbm=isch&chips=q:happiness+face,online_chips:human&hl=ko&sa=X&ved=2ahUKEwiji4T96NTvAhXCEXAKHZKxBh4Q4lYoAnoECAEQGw&biw=1029&bih=845',        
         'Fear' : 'https://www.google.com/search?q=fear+face&tbm=isch&chips=q:fear+face,online_chips:human&hl=ko&sa=X&ved=2ahUKEwicgtek6dTvAhVRfHAKHRcXB8AQ4lYoAnoECAEQGw&biw=1029&bih=845',
         }
 
