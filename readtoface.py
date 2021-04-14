@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+import cv2
 import os
 import random
 import numpy as np
@@ -90,6 +91,7 @@ torch.manual_seed(seed)
 torch.cuda.manual_seed(seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = True
+
 #하이퍼 파라미터 설정
 batch_size = 64  # 학습 배치 크기
 test_batch_size = 1000  # 테스트 배치 크기 (학습 과정을 제외하므로 더 큰 배치 사용 가능)
@@ -167,3 +169,52 @@ for epoch in range(1, max_epochs+1):
         print(f'# save model: cifar10_cnn_model_best_acc_{best_epoch}-epoch.pt\n')
 
 print(f'\n\n# Best accuracy model({best_acc * 100:.2f}%): cifar10_cnn_model_best_acc_{best_epoch}-epoch.pt\n')
+
+
+
+class Custom_Dataloder(torch.utils.data.Dataset):
+    def __init__(self):
+        one_hot = {
+            'Anger'   : [1,0,0,0,0],
+            'Disgust' : [0,1,0,0,0],
+            'Fear'    : [0,0,1,0,0],
+            'Joy'     : [0,0,0,1,0],
+            'Sadness' : [0,0,0,0,1],
+        }
+
+        root_path =r'face_detecting_data\crawler\imageset'
+        imageset_list = os.listdir(root_path)
+        train_dataset = []
+        for emotion in imageset_list:
+            emotion_image_path = os.path.join(root_path, emotion)
+            emotion_images = os.listdir(emotion_image_path)
+            for image in emotion_images:
+                image = cv2.imread(os.path.join(emotion_image_path, image))
+                # resize
+                image = cv2.resize(image, (64,64))
+                # BGR2Gray
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                # normalize
+                image = (image[:,:] - 127.5) / 127.5
+
+                train_dataset.append([image, one_hot[emotion]])
+        random.shuffle(train_dataset)
+        train_dataset = np.array(train_dataset)
+        
+        self.x_data = train_dataset[:,0]
+        self.y_data = train_dataset[:,1]
+        
+
+    def __getitem__(self, index):
+        return self.x_data[index], self.y_data[index]
+
+    def __len__(self):
+        return self.x_data.shape[0]
+
+
+
+
+
+
+
+
